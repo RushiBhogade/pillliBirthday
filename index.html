@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Happy Birthday Rutul!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Pacifico&display=swap");
+
+      body {
+        font-family: "Fredoka", sans-serif;
+        background: linear-gradient(135deg, #ffd1dc 0%, #ffe4e1 100%);
+        overflow: hidden; /* Prevent scrolling during drag */
+        touch-action: none; /* Crucial for mobile slider */
+      }
+
+      .handwritten {
+        font-family: "Pacifico", cursive;
+      }
+
+      /* Floating Hearts Animation Background */
+      .bg-heart {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.4);
+        animation: float 6s linear infinite;
+        z-index: 0;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(110vh) scale(0.5);
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-10vh) scale(1.2);
+          opacity: 0;
+        }
+      }
+
+      /* Slider Styles */
+      .slider-container {
+        position: relative;
+        width: 100%;
+        height: 64px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 9999px;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .slider-text {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ff6b8b;
+        font-weight: 600;
+        pointer-events: none;
+        letter-spacing: 1px;
+        padding-left: 20px; /* Offset text slightly right to encourage right movement */
+      }
+
+      .slider-knob {
+        position: absolute;
+        left: 50%; /* Start in middle */
+        top: 4px;
+        bottom: 4px;
+        width: 56px;
+        border-radius: 50%;
+        background: #ff6b8b;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: grab;
+        transform: translateX(-50%);
+        z-index: 10;
+        transition: background 0.3s;
+      }
+
+      .slider-knob:active {
+        cursor: grabbing;
+        transform: translateX(-50%) scale(0.95);
+      }
+
+      /* Animations */
+      .pop-in {
+        animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      }
+
+      @keyframes popIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.5) translateY(20px);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .wiggle {
+        animation: wiggle 2s linear infinite;
+      }
+
+      @keyframes wiggle {
+        0%,
+        7% {
+          transform: rotateZ(0);
+        }
+        15% {
+          transform: rotateZ(-5deg);
+        }
+        20% {
+          transform: rotateZ(3deg);
+        }
+        25% {
+          transform: rotateZ(-5deg);
+        }
+        30% {
+          transform: rotateZ(2deg);
+        }
+        35%,
+        100% {
+          transform: rotateZ(0);
+        }
+      }
+
+      .photo-frame {
+        border: 4px solid white;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transform: rotate(-2deg);
+        transition: transform 0.3s ease;
+      }
+      .photo-frame:hover {
+        transform: rotate(0deg) scale(1.05);
+        z-index: 20;
+      }
+
+      /* Error Screen Shake */
+      .shake {
+        animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both infinite;
+      }
+      @keyframes shake {
+        10%,
+        90% {
+          transform: translate3d(-1px, 0, 0);
+        }
+        20%,
+        80% {
+          transform: translate3d(2px, 0, 0);
+        }
+        30%,
+        50%,
+        70% {
+          transform: translate3d(-4px, 0, 0);
+        }
+        40%,
+        60% {
+          transform: translate3d(4px, 0, 0);
+        }
+      }
+
+      /* Slideshow Fade */
+      .fade-enter {
+        opacity: 0;
+        transform: scale(0.9);
+        transition: opacity 0.5s, transform 0.5s;
+      }
+      .fade-enter-active {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      /* Countdown Text */
+      .countdown-text {
+        font-size: 8rem;
+        font-weight: 800;
+        color: #ff6b8b;
+        text-shadow: 4px 4px 0px white;
+        animation: pulse 1s infinite;
+      }
+    </style>
+  </head>
+  <body class="h-screen w-screen flex items-center justify-center relative">
+    <!-- Background Hearts (Generated by JS) -->
+    <audio id="bgsound" loop>
+      <source src="happy-birthday-401919.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    <div
+      id="hearts-container"
+      class="absolute inset-0 pointer-events-none overflow-hidden"
+    ></div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app" class="relative z-10 w-full max-w-md px-6">
+      <!-- SCREEN 1: THE TRICKY LOCK -->
+      <div
+        id="lock-screen"
+        class="bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl text-center border-4 border-white"
+      >
+        <div class="mb-6 relative inline-block">
+          <div
+            class="w-32 h-32 bg-pink-50 rounded-full flex items-center justify-center mx-auto overflow-hidden"
+          >
+            <img
+              src="https://media.giphy.com/media/cfuL5gqFDreXxkWQ4o/giphy.gif"
+              alt="Thinking Cat"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <div class="absolute -top-2 -right-2 text-2xl animate-pulse">🤔</div>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2 handwritten">
+          Access Required
+        </h1>
+        <p class="text-gray-500 mb-8 text-sm">
+          Security Check: Are you <b>(Pilliii)</b>?<br />Follow the arrow to
+          open!
+        </p>
+
+        <p class="text-gray-500 mb-8 text-sm">
+          Slide Right to Open <i class="fas fa-arrow-right ml-2"></i>
+        </p>
+
+        <div class="slider-container" id="sliderTrack">
+          <div class="slider-knob" id="sliderKnob">
+            <i class="fas fa-paw"></i>
+          </div>
+        </div>
+        <p
+          id="feedback-msg"
+          class="h-6 mt-4 text-pink-500 font-bold text-sm transition-opacity opacity-0"
+        >
+          Nope, try again! 😜
+        </p>
+      </div>
+
+      <!-- SCREEN 2: FAKE ERROR / TROLL -->
+      <div
+        id="troll-screen"
+        class="hidden text-center bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-2xl border-4 border-red-400"
+      >
+        <div class="mb-4">
+          <i
+            class="fas fa-exclamation-triangle text-6xl text-red-500 shake"
+          ></i>
+        </div>
+        <h2 class="text-3xl font-bold text-red-500 mb-4">CRITICAL ERROR!</h2>
+        <p class="text-gray-800 font-bold mb-2">System Overload detected!</p>
+        <p class="text-gray-600 mb-6" id="troll-text">Scanning subject...</p>
+        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+          <div
+            class="bg-red-500 h-2.5 rounded-full"
+            style="width: 10%"
+            id="progress-bar"
+          ></div>
+        </div>
+        <p class="text-xs text-red-400 font-mono">CODE: CUTENESS_TOO_HIGH</p>
+      </div>
+
+      <!-- SCREEN 3: SLIDESHOW (New) -->
+      <div
+        id="slideshow-screen"
+        class="hidden w-full h-80 relative flex items-center justify-center"
+      >
+        <!-- Images inserted by JS -->
+        <img
+          id="slideshow-img"
+          src=""
+          class="max-w-full max-h-full rounded-2xl shadow-2xl border-4 border-white object-cover transition-all duration-500 opacity-0 transform scale-95"
+        />
+      </div>
+
+      <!-- SCREEN 4: COUNTDOWN (New) -->
+      <div id="countdown-screen" class="hidden text-center">
+        <div id="countdown-number" class="countdown-text">3</div>
+        <p class="text-white font-bold text-xl mt-4">Get Ready...</p>
+      </div>
+
+      <!-- SCREEN 5: THE REAL SURPRISE -->
+      <div id="surprise-screen" class="hidden text-center">
+        <div
+          class="bg-white/90 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border-4 border-pink-200 pop-in"
+        >
+          <h1 class="text-4xl font-bold text-pink-500 mb-2 handwritten wiggle">
+            Happy Birthday Pilluuuuu! 🎂
+          </h1>
+
+          <div class="grid grid-cols-2 gap-3 mb-6 mt-6">
+            <div
+              class="photo-frame rounded-xl overflow-hidden bg-pink-100 aspect-square"
+            >
+              <img
+                src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG94OGtpcGYzYnc3eDk5a21jM3dhYzE2bGZ5b2thdTNndnYyN2hoaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KztT2c4u8mYYUiMKdJ/giphy.gif"
+                alt="Peach Goma Hug"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div
+              class="photo-frame rounded-xl overflow-hidden bg-pink-100 aspect-square"
+              style="transform: rotate(3deg)"
+            >
+              <img
+                src="https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif"
+                alt="Cute Cat"
+                class="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-3 mb-6">
+            <p class="text-gray-700 text-lg font-bold">
+              Just kidding! You broke the system my cutieee! 🥺💖
+            </p>
+            <p class="text-gray-600 text-sm italic">
+              "Wishing the happiest birthday to my favorite person,
+              dhabiiiiiiiiii. Love, Rushayyyyyyaaa!"
+            </p>
+          </div>
+
+          <button
+            onclick="fireworks()"
+            class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2"
+          >
+            <i class="fas fa-heart"></i> Yayyy!
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* --- 1. Background Hearts Generator --- */
+      function createHearts() {
+        const container = document.getElementById("hearts-container");
+        const heartCount = 15;
+        for (let i = 0; i < heartCount; i++) {
+          const heart = document.createElement("i");
+          heart.classList.add("fas", "fa-heart", "bg-heart");
+          heart.style.left = Math.random() * 100 + "vw";
+          heart.style.animationDuration = Math.random() * 3 + 4 + "s";
+          heart.style.animationDelay = Math.random() * 5 + "s";
+          heart.style.fontSize = Math.random() * 20 + 10 + "px";
+          container.appendChild(heart);
+        }
+      }
+      createHearts();
+
+      /* --- 2. The Tricky Slider Logic --- */
+      const track = document.getElementById("sliderTrack");
+      const knob = document.getElementById("sliderKnob");
+      const feedback = document.getElementById("feedback-msg");
+
+      // Screens
+      const lockScreen = document.getElementById("lock-screen");
+      const trollScreen = document.getElementById("troll-screen");
+      const slideshowScreen = document.getElementById("slideshow-screen");
+      const countdownScreen = document.getElementById("countdown-screen");
+      const surpriseScreen = document.getElementById("surprise-screen");
+
+      let isDragging = false;
+      let startX = 0;
+      let currentX = 0;
+      let trackWidth = 0;
+      let maxRight = 0;
+      let maxLeft = 0;
+
+      const wrongMessages = [
+        "yet nahi tula dhabii! 😜",
+        "tu maja yaikat ahheeee hehe? 🤔",
+        "papa bol dhabii papa!",
+        "Pilliii, focus! 😂",
+        "This is a test... you're failing! 🙃",
+      ];
+
+      function initSlider() {
+        trackWidth = track.offsetWidth;
+        maxRight = trackWidth / 2 - 32;
+        maxLeft = -(trackWidth / 2) + 32;
+      }
+
+      knob.addEventListener("mousedown", startDrag);
+      window.addEventListener("mousemove", onDrag);
+      window.addEventListener("mouseup", endDrag);
+
+      knob.addEventListener("touchstart", (e) => startDrag(e.touches[0]));
+      window.addEventListener("touchmove", (e) => onDrag(e.touches[0]));
+      window.addEventListener("touchend", endDrag);
+
+      function startDrag(e) {
+        isDragging = true;
+        startX = e.clientX;
+        knob.style.transition = "none";
+      }
+
+      function onDrag(e) {
+        if (!isDragging) return;
+        const deltaX = e.clientX - startX;
+        currentX = deltaX;
+
+        if (currentX > maxRight) currentX = maxRight;
+        if (currentX < maxLeft) currentX = maxLeft;
+
+        knob.style.transform = `translate(calc(-50% + ${currentX}px))`;
+
+        if (currentX > 20) {
+          knob.style.backgroundColor = "#ef4444";
+        } else if (currentX < -20) {
+          knob.style.backgroundColor = "#22c55e";
+        } else {
+          knob.style.backgroundColor = "#ff6b8b";
+        }
+      }
+
+      function endDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        knob.style.transition =
+          "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+
+        if (currentX < -50) {
+          unlockSequence();
+        } else if (currentX > 50) {
+          knob.style.transform = `translateX(-50%)`;
+          knob.style.backgroundColor = "#ff6b8b";
+          feedback.innerText =
+            wrongMessages[Math.floor(Math.random() * wrongMessages.length)];
+          feedback.style.opacity = "1";
+          setTimeout(() => {
+            feedback.style.opacity = "0";
+          }, 2000);
+        } else {
+          knob.style.transform = `translateX(-50%)`;
+          knob.style.backgroundColor = "#ff6b8b";
+        }
+        currentX = 0;
+      }
+
+      /* --- 3. The Sequence Logic --- */
+      function unlockSequence() {
+        knob.style.transform = `translate(calc(-50% + ${maxLeft}px))`;
+        setTimeout(() => {
+          lockScreen.classList.add("hidden");
+          startTroll();
+        }, 300);
+      }
+
+      function startTroll() {
+        trollScreen.classList.remove("hidden");
+        const bar = document.getElementById("progress-bar");
+        const text = document.getElementById("troll-text");
+
+        setTimeout(() => {
+          bar.style.width = "40%";
+          text.innerText = "Analyzing Cutie Levels...";
+        }, 1000);
+
+        setTimeout(() => {
+          bar.style.width = "80%";
+          bar.classList.replace("bg-red-500", "bg-purple-600");
+          text.innerText = "⚠️ WARNING: CUTENESS OVERLOAD!";
+          text.classList.add("text-red-600", "font-bold");
+        }, 2000);
+
+        setTimeout(() => {
+          bar.style.width = "100%";
+          trollScreen.classList.add("hidden");
+          startSlideshow(); // Modified: Go to slideshow instead of surprise
+        }, 3500);
+      }
+      // --- 3. The Sequence Logic ---
+      function unlockSequence() {
+        knob.style.transform = `translate(calc(-50% + ${maxLeft}px))`;
+
+        // --- START: NEW LINE TO PLAY MUSIC ---
+        const bgMusic = document.getElementById("bgsound");
+        bgMusic.volume = 0.5; // Optional: Adjust volume (0.0 to 1.0)
+        bgMusic.play().catch((error) => {
+          // Console error if playback is blocked, helpful for debugging
+          console.error("Music playback failed:", error);
+        });
+        // --- END: NEW LINE TO PLAY MUSIC ---
+
+        setTimeout(() => {
+          lockScreen.classList.add("hidden");
+          startTroll();
+        }, 300);
+      }
+      function startSlideshow() {
+        slideshowScreen.classList.remove("hidden");
+        const imgEl = document.getElementById("slideshow-img");
+
+        // Add your own image URLs here for the slideshow!
+        const images = [
+          "./IMG_20241201_193656.jpg",
+          "./IMG_20250215_234533.jpg",
+          "./IMG_20250413_175430.jpg",
+          "./Snapchat-2145235070.jpg",
+        ];
+
+        let index = 0;
+
+        function showNextImage() {
+          if (index >= images.length) {
+            slideshowScreen.classList.add("hidden");
+            startCountdown();
+            return;
+          }
+
+          imgEl.src = images[index];
+          imgEl.classList.remove("opacity-0", "scale-95");
+          imgEl.classList.add("opacity-100", "scale-100");
+
+          setTimeout(() => {
+            imgEl.classList.remove("opacity-100", "scale-100");
+            imgEl.classList.add("opacity-0", "scale-95");
+
+            setTimeout(() => {
+              index++;
+              showNextImage();
+            }, 500); // Wait for fade out
+          }, 2000); // How long to show each image
+        }
+
+        showNextImage();
+      }
+
+      function startCountdown() {
+        countdownScreen.classList.remove("hidden");
+        const numEl = document.getElementById("countdown-number");
+        let count = 3;
+
+        const timer = setInterval(() => {
+          count--;
+          if (count > 0) {
+            numEl.innerText = count;
+          } else {
+            clearInterval(timer);
+            countdownScreen.classList.add("hidden");
+            fireworks(); // Firecracker effect
+            setTimeout(() => {
+              surpriseScreen.classList.remove("hidden");
+            }, 500);
+          }
+        }, 1000);
+      }
+
+      /* --- 4. Firecracker/Fireworks Effect --- */
+      function fireworks() {
+        var duration = 3 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        var interval = setInterval(function () {
+          var timeLeft = animationEnd - Date.now();
+
+          if (timeLeft <= 0) {
+            return clearInterval(interval);
+          }
+
+          var particleCount = 50 * (timeLeft / duration);
+          // Random bursts
+          confetti(
+            Object.assign({}, defaults, {
+              particleCount,
+              origin: { x: Math.random(), y: Math.random() - 0.2 },
+            })
+          );
+        }, 250);
+      }
+
+      initSlider();
+      window.addEventListener("resize", initSlider);
+    </script>
+  </body>
+</html>
