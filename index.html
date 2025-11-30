@@ -503,41 +503,68 @@
       function startSlideshow() {
         slideshowScreen.classList.remove("hidden");
         const imgEl = document.getElementById("slideshow-img");
-
-        // Add your own image URLs here for the slideshow!
+    
+        // Ensure image paths are correct and case-sensitive! (as per previous advice)
         const images = [
-          "./IMG_20241201_193656.jpg",
-          "./IMG_20250215_234533.jpg",
-          "./IMG_20250413_175430.jpg",
-          "./Snapchat-2145235070.jpg",
+            "IMG_20241201_193656.jpg",
+            "IMG_20250215_234533.jpg",
+            "IMG_20250413_175430.jpg",
+            "Snapchat-2145235070.jpg",
         ];
-
+    
         let index = 0;
-
+    
         function showNextImage() {
-          if (index >= images.length) {
-            slideshowScreen.classList.add("hidden");
-            startCountdown();
-            return;
-          }
-
-          imgEl.src = images[index];
-          imgEl.classList.remove("opacity-0", "scale-95");
-          imgEl.classList.add("opacity-100", "scale-100");
-
-          setTimeout(() => {
+            if (index >= images.length) {
+                // All images shown, proceed to countdown
+                slideshowScreen.classList.add("hidden");
+                startCountdown();
+                return;
+            }
+    
+            const currentImageSrc = images[index];
+            
+            // 1. Create a temporary image object for preloading
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                // 2. ONLY when the image is fully loaded, update the display element
+                imgEl.src = currentImageSrc;
+                
+                // Apply fade-in effect
+                imgEl.classList.remove("opacity-0", "scale-95");
+                imgEl.classList.add("opacity-100", "scale-100");
+    
+                // 3. Wait 2 seconds (or whatever duration you want) to show the image
+                setTimeout(() => {
+                    // Apply fade-out effect
+                    imgEl.classList.remove("opacity-100", "scale-100");
+                    imgEl.classList.add("opacity-0", "scale-95");
+    
+                    // Wait for the fade-out transition (0.5s) to finish
+                    setTimeout(() => {
+                        index++;
+                        showNextImage(); // Move to the next image
+                    }, 500); 
+                }, 2500); // <-- Time to view the image (Increased slightly for safety)
+            };
+    
+            // If the image fails to load (e.g., bad URL), still proceed:
+            tempImg.onerror = () => {
+                console.error(`Failed to load image: ${currentImageSrc}. Skipping.`);
+                index++;
+                showNextImage();
+            };
+    
+            // Start the download
+            tempImg.src = currentImageSrc;
+            
+            // Ensure the visual element is empty/hidden while waiting for the new image
             imgEl.classList.remove("opacity-100", "scale-100");
             imgEl.classList.add("opacity-0", "scale-95");
-
-            setTimeout(() => {
-              index++;
-              showNextImage();
-            }, 500); // Wait for fade out
-          }, 2000); // How long to show each image
         }
-
+    
         showNextImage();
-      }
+    }
 
       function startCountdown() {
         countdownScreen.classList.remove("hidden");
